@@ -1,0 +1,30 @@
+From 606c4d3500fdf925983bcd48cb3772f85d6982f0 Mon Sep 17 00:00:00 2001
+From: Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+Date: Sun, 6 Apr 2008 15:20:29 -0700
+Subject: [PATCH] qemu: avoid returning uninitialized value in apic_mem_readl
+
+complement 64173d009c1f4d163c425b14aa650df5b982428a to avoid :
+
+  kvm-65/qemu/hw/apic.c: In function `apic_mem_readl':
+  kvm-65/qemu/hw/apic.c:592: warning: 'val' might be used uninitialized in this function
+
+Signed-off-by: Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+---
+ qemu/hw/apic.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/qemu/hw/apic.c b/qemu/hw/apic.c
+index 4102493..b69ad75 100644
+--- a/qemu/hw/apic.c
++++ b/qemu/hw/apic.c
+@@ -616,6 +616,7 @@ static uint32_t apic_mem_readl(void *opaque, target_phys_addr_t addr)
+         val = apic_get_ppr(s);
+         break;
+     case 0x0b:
++        val = 0;
+         break;
+     case 0x0d:
+         val = s->log_dest << 24;
+-- 
+1.5.3.7
+

@@ -1,0 +1,91 @@
+--- kvm-62/qemu/exec.c	2008-02-25 01:30:14.000000000 -0800
++++ kvm-62/qemu/exec.c	2008-02-27 03:51:40.000000000 -0800
+@@ -2020,7 +2020,7 @@
+ 
+ static int subpage_register (subpage_t *mmio, uint32_t start, uint32_t end,
+                              int memory);
+-static void *subpage_init (target_phys_addr_t base, uint32_t *phys,
++static void *subpage_init (target_phys_addr_t base, ram_addr_t *phys,
+                            int orig_memory);
+ #define CHECK_SUBPAGE(addr, start_addr, start_addr2, end_addr, end_addr2, \
+                       need_subpage)                                     \
+@@ -2128,7 +2128,7 @@
+ {
+     ram_addr_t addr;
+     if ((phys_ram_alloc_offset + size) > phys_ram_size) {
+-        fprintf(stderr, "Not enough memory (requested_size = %lu, max memory = %d)\n",
++        fprintf(stderr, "Not enough memory (requested_size = %lu, max memory = %lu)\n",
+                 size, phys_ram_size);
+         abort();
+     }
+@@ -2472,7 +2472,7 @@
+     return 0;
+ }
+ 
+-static void *subpage_init (target_phys_addr_t base, uint32_t *phys,
++static void *subpage_init (target_phys_addr_t base, ram_addr_t *phys,
+                            int orig_memory)
+ {
+     subpage_t *mmio;
+--- kvm-62/qemu/hw/pc.c	2008-02-25 01:30:14.000000000 -0800
++++ kvm-62/qemu/hw/pc.c	2008-02-27 03:52:48.000000000 -0800
+@@ -863,10 +863,10 @@
+ 			ram_addr = aligned_addr;
+ 		}
+ 	}
+-        cpu_register_physical_memory(0x100000000, above_4g_mem_size, ram_addr);
++        cpu_register_physical_memory(0x100000000ULL, above_4g_mem_size, ram_addr);
+ 
+ 	if (kvm_enabled())
+-	    kvm_cpu_register_physical_memory(0x100000000,
++	    kvm_cpu_register_physical_memory(0x100000000ULL,
+ 					     above_4g_mem_size,
+ 					     ram_addr);
+     }
+--- kvm-62/qemu/migration.c	2008-02-25 01:30:14.000000000 -0800
++++ kvm-62/qemu/migration.c	2008-02-27 03:51:40.000000000 -0800
+@@ -834,7 +834,7 @@
+ 
+     size = qemu_get_be32(f);
+     if (size != phys_ram_size) {
+-        fprintf(stderr, "migration: memory size mismatch: recv %u mine %u\n",
++        fprintf(stderr, "migration: memory size mismatch: recv %u mine %lu\n",
+                 size, phys_ram_size);
+ 	return MIG_STAT_DST_MEM_SIZE_MISMATCH;
+     }
+@@ -1090,7 +1090,7 @@
+ 	    term_printf("Transfer rate %3.1f mb/s\n",
+ 			(double)s->bps / (1024 * 1024));
+ 	term_printf("Iteration %d\n", s->iteration);
+-	term_printf("Transferred %d/%d pages\n", s->updated_pages, phys_ram_size >> TARGET_PAGE_BITS);
++	term_printf("Transferred %d/%lu pages\n", s->updated_pages, phys_ram_size >> TARGET_PAGE_BITS);
+ 	if (s->iteration)
+ 	    term_printf("Last iteration found %d dirty pages\n", s->last_updated_pages);
+     } else {
+--- kvm-62/qemu/vl.c	2008-02-25 01:30:14.000000000 -0800
++++ kvm-62/qemu/vl.c	2008-02-27 03:51:40.000000000 -0800
+@@ -146,10 +146,14 @@
+ //#define DEBUG_UNUSED_IOPORT
+ //#define DEBUG_IOPORT
+ 
+-#if HOST_LONG_BITS < 64
++#if TARGET_LONG_BITS < 64
+ #define PHYS_RAM_MAX_SIZE (2047 * 1024 * 1024)
+ #else
++#if HOST_LONG_BITS < 64
+ #define PHYS_RAM_MAX_SIZE (2047 * 1024 * 1024 * 1024ULL)
++#else
++#define PHYS_RAM_MAX_SIZE (2047 * 1024 * 1024 * 1024UL)
++#endif
+ #endif
+ 
+ #ifdef TARGET_PPC
+@@ -9013,7 +9017,7 @@
+                 if (ram_size <= 0)
+                     help(1);
+                 if (ram_size > PHYS_RAM_MAX_SIZE) {
+-                    fprintf(stderr, "qemu: at most %d MB RAM can be simulated\n",
++                    fprintf(stderr, "qemu: at most " TARGET_FMT_lu " MB RAM can be simulated\n",
+                             PHYS_RAM_MAX_SIZE / (1024 * 1024));
+                     exit(1);
+                 }

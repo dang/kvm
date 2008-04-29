@@ -1,0 +1,13 @@
+--- kvm-50/libkvm/Makefile	2007-10-31 06:50:28.000000000 -0700
++++ kvm-50/libkvm/Makefile	2007-11-04 01:23:46.000000000 -0700
+@@ -26,10 +26,6 @@
+ 
+ install:
+ 	install -D libkvm.h $(DESTDIR)/$(PREFIX)/include/libkvm.h
+-	install -D $(KERNELDIR)/include/linux/kvm.h \
+-		$(DESTDIR)/$(PREFIX)/include/linux/kvm.h
+-	install -D $(KERNELDIR)/include/linux/kvm_para.h \
+-		$(DESTDIR)/$(PREFIX)/include/linux/kvm_para.h
+ 	install -D libkvm.a $(DESTDIR)/$(PREFIX)/$(LIBDIR)/libkvm.a
+ 
+ -include .*.d

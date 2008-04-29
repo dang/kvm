@@ -1,0 +1,23 @@
+--- kvm-43/scripts/qemu-ifup	2007-09-20 10:39:37.000000000 -0700
++++ kvm-43/scripts/qemu-ifup	2007-09-22 02:27:28.000000000 -0700
+@@ -1,5 +1,18 @@
+ #!/bin/sh
+ 
+-switch=$(/sbin/ip route list | awk '/^default / { print $NF }')
++if [ -x /sbin/brctl ]; then
++  BRCTL="/sbin/brctl"
++elif [ -x /usr/sbin/brctl ]; then
++  BRCTL="/usr/sbin/brctl"
++else
++  echo "no bridge utils installed"
++  exit 1
++fi
++
++if [ -x /sbin/ip ]; then
++  switch=$(/sbin/ip route list | awk '/^default / { print $NF }')
++else
++  switch=$(/bin/netstat -rn | awk '/^0\.0\.0\.0/ { print $NF }')
++fi
+ /sbin/ifconfig $1 0.0.0.0 up
+-/usr/sbin/brctl addif ${switch} $1
++${BRCTL} addif ${switch} $1

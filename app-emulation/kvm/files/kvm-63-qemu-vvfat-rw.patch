@@ -1,0 +1,38 @@
+commit b84b1f913e8ffc5b21bd20d14490c3c261789326
+Author: Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+Date:   Sun Mar 9 09:38:23 2008 -0700
+
+    qemu: restore rw support for vvfat
+    
+    RW support using a generated qcow base image was modified after qemu 0.8.2
+    was released; while adding AIO support to block-qcow.c in release 1.8; and
+    resulting in a broken qcow image based in an inexistent "fat:" base
+    when "fat:rw" was requested.
+    
+    Signed-off-by: Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+
+diff --git a/qemu/block-qcow.c b/qemu/block-qcow.c
+index 730ae67..0ac2b42 100644
+--- a/qemu/block-qcow.c
++++ b/qemu/block-qcow.c
+@@ -752,11 +752,15 @@ static int qcow_create(const char *filename, int64_t total_size,
+     header_size = sizeof(header);
+     backing_filename_len = 0;
+     if (backing_file) {
+-        header.backing_file_offset = cpu_to_be64(header_size);
+-        backing_filename_len = strlen(backing_file);
+-        header.backing_file_size = cpu_to_be32(backing_filename_len);
+-        header_size += backing_filename_len;
+-        header.mtime = cpu_to_be32(0);
++        if (strcmp(backing_file, "fat:")) {
++            header.backing_file_offset = cpu_to_be64(header_size);
++            backing_filename_len = strlen(backing_file);
++            header.backing_file_size = cpu_to_be32(backing_filename_len);
++            header_size += backing_filename_len;
++        } else {
++            /* special backing file for vvfat */
++            backing_file = NULL;
++        }
+         header.cluster_bits = 9; /* 512 byte cluster to avoid copying
+                                     unmodifyed sectors */
+         header.l2_bits = 12; /* 32 KB L2 tables */

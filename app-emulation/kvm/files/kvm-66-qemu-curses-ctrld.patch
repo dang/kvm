@@ -1,0 +1,21 @@
+commit a89b063568257c7d630e062ba0aeb3c587461e55
+Author: aurel32 <aurel32>
+Date:   Tue Mar 18 06:55:27 2008 +0000
+
+    Typo in curses_keys.h.
+    
+    (Dan Nelson)
+
+diff --git a/qemu/curses_keys.h b/qemu/curses_keys.h
+index 613e5f6..27f9cd8 100644
+--- a/qemu/curses_keys.h
++++ b/qemu/curses_keys.h
+@@ -198,7 +198,7 @@ int curses2keycode[CURSES_KEYS] = {
+ 
+     [0x001] = 30 | CNTRL, /* Control + a */
+     [0x013] = 31 | CNTRL, /* Control + s */
+-    [0x014] = 32 | CNTRL, /* Control + d */
++    [0x004] = 32 | CNTRL, /* Control + d */
+     [0x006] = 33 | CNTRL, /* Control + f */
+     [0x007] = 34 | CNTRL, /* Control + g */
+     [0x008] = 35 | CNTRL, /* Control + h */
