@@ -1,0 +1,11 @@
+diff -ur kvm-67/kernel/i8254.c kvm-67/kernel/i8254.c
+--- kvm-67/kernel/i8254.c	2008-04-28 01:48:42.000000000 -0700
++++ kvm-67/kernel/i8254.c	2008-04-28 20:14:31.000000000 -0700
+@@ -288,6 +288,7 @@
+ 	 * mode 1 is one shot, mode 2 is period, otherwise del timer */
+ 	switch (ps->channels[0].mode) {
+ 	case 1:
++	case 4:
+ 		create_pit_timer(&ps->pit_timer, val, 0);
+ 		break;
+ 	case 2:

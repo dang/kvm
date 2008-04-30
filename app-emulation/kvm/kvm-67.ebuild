@@ -6,7 +6,7 @@ inherit eutils flag-o-matic toolchain-funcs linux-mod
 
 SRC_URI="mirror://sourceforge/${PN}/${P}.tar.gz"
 
-DESCRIPTION="KVM (for Kernel-based Virtual Machine) is a full virtualization solution for Linux on x86 hardware containing virtualization extensions (Intel VT or AMD-V)"
+DESCRIPTION="Kernel-based Virtual Machine userland tools"
 HOMEPAGE="http://kvm.qumranet.com/kvmwiki"
 
 LICENSE="GPL-2"
@@ -68,16 +68,17 @@ src_unpack() {
 	# avoid strip
 	sed -i 's/$(INSTALL) -m 755 -s/$(INSTALL) -m 755/' qemu/Makefile
 
-	epatch ${FILESDIR}/kvm-45-qemu-configure.patch
-	epatch ${FILESDIR}/kvm-61-qemu-kvm.patch
-	epatch ${FILESDIR}/kvm-61-qemu-kvm-doc.patch
-	epatch ${FILESDIR}/kvm-57-qemu-kvm-cmdline.patch
-	epatch ${FILESDIR}/kvm-48-kvm.patch
-	epatch ${FILESDIR}/kvm-43-qemu-ifup.patch
-	epatch ${FILESDIR}/kvm-50-libkvm-no-kernel.patch
-	epatch ${FILESDIR}/kvm-62-qemu-ramaddr.patch
-	epatch ${FILESDIR}/kvm-66-qemu-no-blobs.patch
-	epatch ${FILESDIR}/kvm-57-kernel-longmode.patch
+	epatch "${FILESDIR}"/kvm-45-qemu-configure.patch
+	epatch "${FILESDIR}"/kvm-61-qemu-kvm.patch
+	epatch "${FILESDIR}"/kvm-61-qemu-kvm-doc.patch
+	epatch "${FILESDIR}"/kvm-57-qemu-kvm-cmdline.patch
+	epatch "${FILESDIR}"/kvm-48-kvm.patch
+	epatch "${FILESDIR}"/kvm-43-qemu-ifup.patch
+	epatch "${FILESDIR}"/kvm-50-libkvm-no-kernel.patch
+	epatch "${FILESDIR}"/kvm-62-qemu-ramaddr.patch
+	epatch "${FILESDIR}"/kvm-66-qemu-no-blobs.patch
+	epatch "${FILESDIR}"/kvm-57-kernel-longmode.patch
+	epatch "${FILESDIR}"/kvm-67-kernel-i8254-mode4.patch
 }
 
 src_compile() {
@@ -132,28 +133,32 @@ src_install() {
 	emake DESTDIR="${D}" kcmd='#' install || die "make install failed"
 
 	exeinto /usr/bin/
-	doexe ${S}/kvm_stat
-	mv ${D}/usr/share/man/man1/qemu.1 ${D}/usr/share/man/man1/kvm.1
-	mv ${D}/usr/share/man/man1/qemu-img.1 ${D}/usr/share/man/man1/kvm-img.1
-	mv ${D}/usr/bin/qemu-img ${D}/usr/bin/kvm-img
+	doexe /kvm_stat
+
+	mv "${D}"/usr/share/man/man1/qemu.1 "${D}"/usr/share/man/man1/kvm.1
+	mv "${D}"/usr/share/man/man1/qemu-img.1 "${D}"/usr/share/man/man1/kvm-img.1
+	mv "${D}"/usr/bin/qemu-img "${D}"/usr/bin/kvm-img
+
 	insinto /etc/udev/rules.d/
-	doins ${S}/scripts/65-kvm.rules
+	doins scripts/65-kvm.rules
+
 	insinto /etc/kvm/
 	insopts -m0755
-	newins ${S}/scripts/qemu-ifup kvm-ifup
-	dodoc ${S}/qemu/pc-bios/README
-	newdoc ${S}/qemu/qemu-doc.html kvm-doc.html
-	newdoc ${S}/qemu/qemu-tech.html kvm-tech.html
+	newins scripts/qemu-ifup kvm-ifup
+
+	dodoc qemu/pc-bios/README
+	newdoc qemu/qemu-doc.html kvm-doc.html
+	newdoc qemu/qemu-tech.html kvm-tech.html
 }
 
 pkg_postinst() {
-	elog "If you don't have kvm compiled into the kernel, make sure you have the kernel" 
-	elog "module loaded before running kvm. The easiest way to ensure that the kernel "
-	elog "module is loaded is to load it on boot."
+	elog "If you don't have kvm compiled into the kernel, make sure you have"
+	elog "the kernel module loaded before running kvm. The easiest way to"
+	elog "ensure that the kernel module is loaded is to load it on boot."
 	elog "For AMD CPUs the module is called 'kvm-amd'"
 	elog "For Intel CPUs the module is called 'kvm-intel'"
 	elog "Please review /etc/conf.d/modules for how to load these"
-	elog 
+	elog
 	elog "Make sure your user is in the 'kvm' group"
 	elog "Just run 'gpasswd -a <USER> kvm', then have <USER> re-login."
 	elog
