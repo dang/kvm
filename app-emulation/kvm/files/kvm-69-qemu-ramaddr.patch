@@ -1,0 +1,33 @@
+diff --exclude-from=/home/dang/.scripts/diffrc -up -ruN kvm-69.orig/qemu/exec.c kvm-69/qemu/exec.c
+--- kvm-69.orig/qemu/exec.c	2008-05-12 07:30:43.000000000 -0400
++++ kvm-69/qemu/exec.c	2008-05-21 09:51:10.000000000 -0400
+@@ -2154,7 +2154,7 @@ ram_addr_t qemu_ram_alloc(ram_addr_t siz
+ {
+     ram_addr_t addr;
+     if ((phys_ram_alloc_offset + size) > phys_ram_size) {
+-        fprintf(stderr, "Not enough memory (requested_size = %lu, max memory = %ld)\n",
++        fprintf(stderr, "Not enough memory (requested_size = %lu, max memory = %lu)\n",
+                 size, phys_ram_size);
+         abort();
+     }
+diff --exclude-from=/home/dang/.scripts/diffrc -up -ruN kvm-69.orig/qemu/migration.c kvm-69/qemu/migration.c
+--- kvm-69.orig/qemu/migration.c	2008-05-12 07:30:43.000000000 -0400
++++ kvm-69/qemu/migration.c	2008-05-21 09:50:27.000000000 -0400
+@@ -834,7 +834,7 @@ static int migrate_incoming_fd(int fd)
+ 
+     size = qemu_get_be32(f);
+     if (size != phys_ram_size) {
+-        fprintf(stderr, "migration: memory size mismatch: recv %u mine %u\n",
++        fprintf(stderr, "migration: memory size mismatch: recv %u mine %lu\n",
+                 size, phys_ram_size);
+ 	return MIG_STAT_DST_MEM_SIZE_MISMATCH;
+     }
+@@ -1090,7 +1090,7 @@ void do_info_migration(void)
+ 	    term_printf("Transfer rate %3.1f mb/s\n",
+ 			(double)s->bps / (1024 * 1024));
+ 	term_printf("Iteration %d\n", s->iteration);
+-	term_printf("Transferred %d/%d pages\n", s->updated_pages, phys_ram_size >> TARGET_PAGE_BITS);
++	term_printf("Transferred %d/%lu pages\n", s->updated_pages, phys_ram_size >> TARGET_PAGE_BITS);
+ 	if (s->iteration)
+ 	    term_printf("Last iteration found %d dirty pages\n", s->last_updated_pages);
+     } else {
