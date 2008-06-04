@@ -68,16 +68,17 @@ src_unpack() {
 	# avoid strip
 	sed -i 's/$(INSTALL) -m 755 -s/$(INSTALL) -m 755/' qemu/Makefile
 
-	epatch "${FILESDIR}"/kvm-45-qemu-configure.patch
-	epatch "${FILESDIR}"/kvm-61-qemu-kvm.patch
-	epatch "${FILESDIR}"/kvm-61-qemu-kvm-doc.patch
-	epatch "${FILESDIR}"/kvm-57-qemu-kvm-cmdline.patch
-	epatch "${FILESDIR}"/kvm-48-kvm.patch
-	epatch "${FILESDIR}"/kvm-43-qemu-ifup.patch
-	epatch "${FILESDIR}"/kvm-57-kernel-longmode.patch
-	epatch "${FILESDIR}"/kvm-68-libkvm-no-kernel.patch
-	epatch "${FILESDIR}"/kvm-69-qemu-ramaddr.patch
-	epatch "${FILESDIR}"/kvm-69-qemu-no-blobs.patch
+	epatch \
+		"${FILESDIR}"/kvm-45-qemu-configure.patch \
+		"${FILESDIR}"/kvm-61-qemu-kvm.patch \
+		"${FILESDIR}"/kvm-61-qemu-kvm-doc.patch \
+		"${FILESDIR}"/kvm-57-qemu-kvm-cmdline.patch \
+		"${FILESDIR}"/kvm-48-kvm.patch \
+		"${FILESDIR}"/kvm-57-kernel-longmode.patch \
+		"${FILESDIR}"/kvm-68-libkvm-no-kernel.patch \
+		"${FILESDIR}"/kvm-69-qemu-ramaddr.patch \
+		"${FILESDIR}"/kvm-69-qemu-no-blobs.patch \
+		"${FILESDIR}"/kvm-69-qemu-ifup_ifdown.patch
 }
 
 src_compile() {
@@ -144,6 +145,7 @@ src_install() {
 	insinto /etc/kvm/
 	insopts -m0755
 	newins scripts/qemu-ifup kvm-ifup
+	newins scripts/qemu-ifdown kvm-ifdown
 
 	dodoc qemu/pc-bios/README
 	newdoc qemu/qemu-doc.html kvm-doc.html
