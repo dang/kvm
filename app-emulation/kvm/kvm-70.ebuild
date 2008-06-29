@@ -12,8 +12,8 @@ HOMEPAGE="http://kvm.qumranet.com/kvmwiki"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="-* ~amd64 ~x86"
-IUSE="alsa bios esd gnutls ncurses sdl test"
-RESTRICT="mirror test"
+IUSE="alsa bios esd gnutls havekernel ncurses sdl test"
+RESTRICT="mirror test havekernel"
 
 RDEPEND="sys-libs/zlib
 	alsa? ( >=media-libs/alsa-lib-1.0.13 )
@@ -34,7 +34,11 @@ DEPEND="${RDEPEND}
 QA_TEXTRELS="usr/bin/kvm"
 
 pkg_setup() {
-	if kernel_is lt 2 6 22; then
+	# check kernel version
+	if use havekernel ; then
+		ewarn "You have the 'havekernel' use flag set.  This means you"
+		ewarn "must ensure you have a compatible kernel on your own."
+	elif kernel_is lt 2 6 22; then
 		eerror "the kvm in your kernel requires an older version of"
 		eerror "kvm as shown in :"
 		eerror "  http://kvm.qumranet.com/kvmwiki/Downloads"
@@ -42,7 +46,10 @@ pkg_setup() {
 	fi
 
 	# check for kvm support
-	if ! linux_chkconfig_present KVM; then
+	if use havekernel ; then
+		ewarn "You have the 'havekernel' use flag set.  This means you"
+		ewarn "must ensure your kernel has KVM support enable on your own"
+	elif ! linux_chkconfig_present KVM; then
 		eerror "Please enable KVM support in your kernel, found at:"
 		eerror
 		eerror "  Virtualization"
@@ -133,7 +140,7 @@ src_install() {
 	emake DESTDIR="${D}" kcmd='#' install || die "make install failed"
 
 	exeinto /usr/bin/
-	doexe /kvm_stat
+	doexe "${S}/kvm_stat"
 
 	mv "${D}"/usr/share/man/man1/qemu.1 "${D}"/usr/share/man/man1/kvm.1
 	mv "${D}"/usr/share/man/man1/qemu-img.1 "${D}"/usr/share/man/man1/kvm-img.1
